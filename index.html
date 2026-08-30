@@ -1,0 +1,352 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador de Estudos - Medicina</title>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --secondary: #3b82f6;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --accent-pratica: #fee2e2;
+            --accent-pratica-text: #991b1b;
+            --accent-teorica: #dbeafe;
+            --accent-teorica-text: #1e40af;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .priority-card {
+            background: linear-gradient(135deg, #0f172a, #1e3a8a);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        .priority-card h2 {
+            margin-top: 0;
+            font-size: 1.1rem;
+            color: #93c5fd;
+        }
+        .priority-card .subject {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+        .card {
+            background: var(--card);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .stat-box {
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .stat-box span {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-top: 5px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #2563eb;
+        }
+        .btn-danger {
+            background-color: var(--danger);
+            margin-top: 10px;
+        }
+        .btn-danger:hover {
+            background-color: var(--danger-hover);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            text-align: left;
+            padding: 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        th {
+            background-color: #f1f5f9;
+        }
+        .tag {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        .tag-pratica {
+            background-color: var(--accent-pratica);
+            color: var(--accent-pratica-text);
+        }
+        .tag-teorica {
+            background-color: var(--accent-teorica);
+            color: var(--accent-teorica-text);
+        }
+        .empty-state {
+            text-align: center;
+            color: #64748b;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Tracker de Estudos de Medicina</h1>
+        
+        <div class="priority-card">
+            <h2>Maior Prioridade de Estudo Hoje</h2>
+            <div class="subject" id="prioritySubject">Carregando...</div>
+            <p id="priorityReason" style="margin-bottom:0; font-size: 0.9rem; color: #cbd5e1;"></p>
+        </div>
+
+        <div class="card">
+            <h3>Progresso e Estatísticas</h3>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    Total Estudado
+                    <span id="totalHours">0h</span>
+                </div>
+                <div class="stat-box">
+                    Horas Práticas
+                    <span id="praticaHours">0h</span>
+                </div>
+                <div class="stat-box">
+                    Horas Teóricas
+                    <span id="teoricaHours">0h</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Registrar Sessão de Estudo</h3>
+            <form id="studyForm">
+                <div class="form-group">
+                    <label for="subjectSelect">Matéria</label>
+                    <select id="subjectSelect" required>
+                        <option value="">Selecione...</option>
+                        <option value="Anatomia">Anatomia</option>
+                        <option value="Biologia Celular">Biologia Celular</option>
+                        <option value="Bioquímica">Bioquímica</option>
+                        <option value="Histologia">Histologia</option>
+                        <option value="Neuroanatomia">Neuroanatomia</option>
+                        <option value="Fisiologia">Fisiologia</option>
+                        <option value="Embriologia">Embriologia</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="typeSelect">Tipo de Estudo</label>
+                    <select id="typeSelect" required>
+                        <option value="Prática">Prática (Lâminas / Peças)</option>
+                        <option value="Teórica">Teórica</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="hoursInput">Tempo Estudado (em horas)</label>
+                    <input type="number" id="hoursInput" min="0.5" step="0.5" placeholder="Ex: 2" required>
+                </div>
+                <button type="submit">Salvar Registro</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h3>Histórico de Estudos</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Matéria</th>
+                        <th>Tipo</th>
+                        <th>Duração</th>
+                    </tr>
+                </thead>
+                <tbody id="historyTable">
+                </tbody>
+            </table>
+            <button type="button" class="btn-danger" id="clearBtn" style="display: none;" onclick="clearHistory()">Limpar Histórico</button>
+        </div>
+    </div>
+
+    <script>
+        const exams = [
+            { subject: 'Histologia', type: 'Prática', date: '2026-08-31' },
+            { subject: 'Anatomia', type: 'Prática', date: '2026-09-01' },
+            { subject: 'Bioquímica', type: 'Prática', date: '2026-09-02' },
+            { subject: 'Biologia Celular', type: 'Prática', date: '2026-09-02' },
+            { subject: 'Anatomia', type: 'Teórica', date: '2026-09-08' },
+            { subject: 'Biologia Celular', type: 'Teórica', date: '2026-09-09' },
+            { subject: 'Neuroanatomia', type: 'Teórica', date: '2026-09-11' },
+            { subject: 'Fisiologia', type: 'Teórica', date: '2026-09-14' },
+            { subject: 'Bioquímica', type: 'Teórica', date: '2026-09-15' },
+            { subject: 'Histologia', type: 'Teórica', date: '2026-09-16' },
+            { subject: 'Embriologia', type: 'Teórica', date: '2026-09-17' }
+        ];
+
+        let studyLogs = JSON.parse(localStorage.getItem('medStudyLogs')) || [];
+
+        function calculatePriority() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            let upcomingExams = exams
+                .map(exam => {
+                    const examDate = new Date(exam.date + 'T00:00:00');
+                    const diffDays = Math.ceil((examDate - today) / (1000 * 60 * 60 * 24));
+                    return { ...exam, diffDays };
+                })
+                .filter(exam => exam.diffDays >= 0)
+                .sort((a, b) => a.diffDays - b.diffDays);
+
+            if (upcomingExams.length > 0) {
+                const priority = upcomingExams[0];
+                document.getElementById('prioritySubject').innerText = `${priority.subject} (${priority.type})`;
+                
+                if (priority.diffDays === 0) {
+                    document.getElementById('priorityReason').innerText = `A prova é HOJE! Faça uma revisão final leve.`;
+                } else if (priority.diffDays === 1) {
+                    document.getElementById('priorityReason').innerText = `A prova é AMANHÃ! Foco total em revisão intensiva.`;
+                } else {
+                    document.getElementById('priorityReason').innerText = `Faltam ${priority.diffDays} dias para esta prova.`;
+                }
+            } else {
+                document.getElementById('prioritySubject').innerText = "Todas as provas foram concluídas!";
+                document.getElementById('priorityReason').innerText = "";
+            }
+        }
+
+        function updateStats() {
+            let total = 0;
+            let pratica = 0;
+            let teorica = 0;
+
+            studyLogs.forEach(log => {
+                const hours = parseFloat(log.hours);
+                total += hours;
+                if (log.type === 'Prática') {
+                    pratica += hours;
+                } else if (log.type === 'Teórica') {
+                    teorica += hours;
+                }
+            });
+
+            document.getElementById('totalHours').innerText = `${total}h`;
+            document.getElementById('praticaHours').innerText = `${pratica}h`;
+            document.getElementById('teoricaHours').innerText = `${teorica}h`;
+        }
+
+        function renderHistory() {
+            const tbody = document.getElementById('historyTable');
+            const clearBtn = document.getElementById('clearBtn');
+            tbody.innerHTML = '';
+            
+            if (studyLogs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="empty-state">Nenhum estudo registrado ainda.</td></tr>`;
+                clearBtn.style.display = 'none';
+                updateStats();
+                return;
+            }
+
+            clearBtn.style.display = 'block';
+
+            studyLogs.slice().reverse().forEach(log => {
+                const tr = document.createElement('tr');
+                const tagClass = log.type === 'Prática' ? 'tag-pratica' : 'tag-teorica';
+                tr.innerHTML = `
+                    <td>${log.date}</td>
+                    <td><b>${log.subject}</b></td>
+                    <td><span class="tag ${tagClass}">${log.type}</span></td>
+                    <td>${log.hours}h</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            updateStats();
+        }
+
+        function clearHistory() {
+            if (confirm('Deseja realmente apagar todo o seu histórico de estudos?')) {
+                studyLogs = [];
+                localStorage.removeItem('medStudyLogs');
+                renderHistory();
+            }
+        }
+
+        document.getElementById('studyForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const subject = document.getElementById('subjectSelect').value;
+            const type = document.getElementById('typeSelect').value;
+            const hours = parseFloat(document.getElementById('hoursInput').value);
+            
+            const date = new Date().toLocaleDateString('pt-BR');
+
+            studyLogs.push({ subject, type, hours, date });
+            localStorage.setItem('medStudyLogs', JSON.stringify(studyLogs));
+            
+            document.getElementById('studyForm').reset();
+            
+            renderHistory();
+        });
+
+        calculatePriority();
+        renderHistory();
+    </script>
+</body>
+</html>
